@@ -6,8 +6,9 @@ from prompts import AddEntry
 class MyTestCase(unittest.TestCase):
     def test_something(self):
         add_entryy = AddEntry()
-        pr = add_entryy.name()
-        assert isinstance(str, pr)
+        pr = add_entryy.time_spent()
+        assert isinstance(pr, int)
+
         # self.assertEqual(True, False)
 
     def test_twt(self):
