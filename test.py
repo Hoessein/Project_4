@@ -4,7 +4,7 @@ import add_entries
 from prompts import AddEntry
 
 class MyTestCase(unittest.TestCase):
-    def test_something(self):
+    def test_time_input(self):
         add_entryy = AddEntry()
         pr = add_entryy.time_spent()
         assert isinstance(pr, int)
