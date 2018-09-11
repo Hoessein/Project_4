@@ -8,7 +8,7 @@ import sys
 
 from peewee import *
 
-db = SqliteDatabase('diafy.db')
+db = SqliteDatabase('worklog.db')
 
 
 class Entry(Model):
@@ -23,7 +23,7 @@ class Entry(Model):
 
 def initialize():
     """create the database and table if the don't exist"""
-    db.connect('diary.db')
+    db.connect('worklog.db')
     db.create_tables([Entry], safe=True)
 
 def clear():
