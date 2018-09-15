@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-from unittest.mock import patch, call
+from unittest.mock import patch
 import unittest
 
 import work_log
@@ -11,22 +9,6 @@ class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.prompts = AddEntry()
         self.entry = work_log
-
-    # def setUp(self):
-    #     add_entries.db.connect()
-    #     add_entries.db.create_tables(add_entries.Entry, safe=True)
-    #
-    #
-    # def test_check_user_table(self):
-    #     assert add_entries.Entry.table_exists()
-    #
-    #
-    # def tearDown(self):
-    #     try:
-    #         add_entries.db.drop_tables(add_entries.Entry)
-    #     except:
-    #         pass
-    #     add_entries.db.close()
 
     def test_input_is_int(self):
         with patch('builtins.input', side_effect=[8]) as mock:
@@ -56,17 +38,20 @@ class MyTestCase(unittest.TestCase):
     def test_menu(self):
         self.assertIsInstance(work_log.menu, dict)
 
-    def test_no(self):
-        with patch('builtins.input', side_effect=["adf", 'q']) as mock:
+    def test_if_notes_or_taskname_input_is_in_database(self):
+        with patch('builtins.input', side_effect=["python testing", 'q']) as mock:
             result = work_log.search_notes_entries()
+            self.assertEqual(work_log.Entry.task_name, result)
+
+    def test_if_minutes_is_in_database(self):
+        with patch('builtins.input', side_effect=["40000", 'q']) as mock:
+            result = work_log.search_minutes_entries()
+            self.assertEqual(work_log.Entry.minutes_worked, result)
+
+    def test_if_date_entry_is_in_database(self):
+        with patch('builtins.input', side_effect=["hoessein", 'q']) as mock:
+            result = work_log.search_name_entries()
             self.assertNotEqual(work_log.Entry.task_name, result)
-
-
-    # def test_l(self):
-    #     with patch('builtins.input', side_effect=["v"]) as mock:
-    #         result = add_entries.menu_loop()
-    #         self.assertIsInstance(result, str)
-
 
 if __name__ == '__main__':
     unittest.main()

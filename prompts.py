@@ -12,7 +12,7 @@ class AddEntry:
 
     def name(self):
         """Takes an input from the user and makes sure its in the write format"""
-        task_date = input("Enter your name").lower()
+        task_date = input("Enter your name: ").lower()
         return task_date
 
     def task_name(self):
