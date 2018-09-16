@@ -19,7 +19,7 @@ def menu_loop():
 
     while choice != 'q':
         clear()
-        print("Welcome, in this appliciation you can store your work activities!\n")
+        print("Welcome, in this application you can store your work activities!\n")
         for key, value in menu.items():
             print('{}) {}'.format(key, value.__doc__))
         choice = input('\nAction: ').lower().strip()
