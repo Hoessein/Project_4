@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 from collections import OrderedDict
-from prompts import AddEntry
 import os
 import sys
 import datetime
 
+from prompts import AddEntry
 from database import Entry, initialize
 
 def clear():
@@ -14,7 +14,7 @@ def clear():
 
 def menu_loop():
     """show the menu"""
-
+    #function inspired by Kenneth Love
     choice = None
 
     while choice != 'q':
@@ -67,7 +67,7 @@ def view_entries(column=None, search_query=None):
 
 def printer(entries):
     """prints entries for each row in the database"""
-
+    #function inspired by Kenneth Love
     counter = 1
     for entry in entries:
         timestamp = entry.timestamp
@@ -86,7 +86,7 @@ def printer(entries):
         print('e) to exit program')
         counter += 1
 
-        next_action = input('\nAction: [Ndq]').lower().strip()
+        next_action = input('\nAction: [Ndqe]').lower().strip()
         if next_action == 'q':
             menu_loop()
             break
@@ -213,11 +213,11 @@ def search_note_and_task_name_entries():
     notes_list = [notes.additional_notes for notes in Entry.select()]
     task_name_list = [tasks.task_name for tasks in Entry.select()]
 
-    to = notes_list + task_name_list
+    notes_task_list = notes_list + task_name_list
 
     while True:
         notes_search = input("Which search entry would you like to make? ")
-        for x in to:
+        for x in notes_task_list:
             if notes_search in x:
                 view_entries('arg', notes_search)
                 menu_loop()
@@ -225,7 +225,7 @@ def search_note_and_task_name_entries():
 
         else:
             clear()
-            print("Not a valid entryyyyyyyyy try again\n")
+            print("Not a valid entry try again\n")
             search_note_and_task_name_entries()
             continue
 
@@ -233,7 +233,6 @@ def delete_entry(entry):
     """delete an entry"""
     if input("Are you sure? [yN] ").lower() == 'y':
         entry.delete_instance()
-        print("Entry deleted")
 
 menu = OrderedDict([
     ('a', add_entry),
