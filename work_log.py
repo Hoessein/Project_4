@@ -60,7 +60,7 @@ def view_entries(column=None, search_query=None):
         field_name = Entry.minutes_worked
         minutes_query = entries.where(field_name.contains(search_query))
         printer(minutes_query)
-    elif column == 'darkchild':
+    else:
         notes_task_search = Entry.select().where(Entry.task_name.contains(search_query) |
                                                  Entry.additional_notes.contains(search_query))
         printer(notes_task_search)
@@ -219,7 +219,7 @@ def search_note_and_task_name_entries():
         notes_search = input("Which search entry would you like to make? ")
         for x in to:
             if notes_search in x:
-                view_entries('darkchild', notes_search)
+                view_entries('arg', notes_search)
                 menu_loop()
                 return
 
