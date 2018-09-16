@@ -14,7 +14,7 @@ def clear():
 
 def menu_loop():
     """show the menu"""
-    #function inspired by Kenneth Love
+    #function inspired by Kenneth Love.
     choice = None
 
     while choice != 'q':
