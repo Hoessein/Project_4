@@ -3,6 +3,8 @@
 from collections import OrderedDict
 from prompts import AddEntry
 import os
+import sys
+import datetime
 
 from database import Entry, initialize
 
@@ -30,7 +32,7 @@ def add_entry():
     """add an entry"""
     add = AddEntry()
 
-    work_log = Entry(name=add.name(), task_name=add.task_name(), minutes_worked=add.time_spent(),
+    work_log = Entry(timestamp=add.task_date(), name=add.employee(), task_name=add.task_name(), minutes_worked=add.time_spent(),
                      additional_notes=add.notes())
     print("Thank you, Your entry was saved succesfully\n")
     work_log.save()
@@ -39,6 +41,7 @@ def add_entry():
 def view_entries(column=None, search_query=None):
     """view previous entries"""
 
+    #sorts the input so the user will see the latest entry the first
     entries = Entry.select().order_by(Entry.timestamp.desc())
 
     if column == 'name':
@@ -57,16 +60,19 @@ def view_entries(column=None, search_query=None):
         field_name = Entry.minutes_worked
         minutes_query = entries.where(field_name.contains(search_query))
         printer(minutes_query)
-    else:
+    elif column == 'darkchild':
         notes_task_search = Entry.select().where(Entry.task_name.contains(search_query) |
                                                  Entry.additional_notes.contains(search_query))
         printer(notes_task_search)
 
 def printer(entries):
     """prints entries for each row in the database"""
+
+    counter = 1
     for entry in entries:
-        timestamp = entry.timestamp.strftime('%A %B %D, %Y %I:%M%p')
+        timestamp = entry.timestamp
         clear()
+        print("Entry:", counter, "of", len(entries))
         print(timestamp)
         print('='*len(timestamp))
         print("Name:", entry.name)
@@ -77,6 +83,8 @@ def printer(entries):
         print('n) next entry')
         print('d) delete entry')
         print('q) return to main menu')
+        print('e) to exit program')
+        counter += 1
 
         next_action = input('\nAction: [Ndq]').lower().strip()
         if next_action == 'q':
@@ -84,11 +92,9 @@ def printer(entries):
             break
         elif next_action == 'd':
             delete_entry(entry)
-
-        #
-        # if next_action == "a":
-        #     entriess = entries.where(Entry.name)
-        #     print(entriess)
+        elif next_action == 'e':
+            print("Thank you for using Worklog, goodbye!")
+            sys.exit()
 
 def search_prints():
     """Prints information to the screen"""
@@ -116,7 +122,7 @@ def search_entries():
                 search_minutes_entries()
             if search == 'd':
                 clear()
-                search_notes_entries()
+                search_note_and_task_name_entries()
             else:
                 clear()
                 search_prints()
@@ -124,13 +130,15 @@ def search_entries():
         print("The database is empty, first add an entry before you can search. ")
 
 def search_name_entries():
-    """Prints every entry entry inside the name column"""
+    """Search for name entries"""
     print("Here are all the name entries: \n")
-    name_list = []
-    for name in Entry.select():
-        name_list.append(name.name)
+    name_list = [name.name for name in Entry.select()]
+
+    counter = 1
+    #prints all the name entries so the user can pick a name
     for name in set(name_list):
-        print(name)
+        print(str(counter)+": "+name)
+        counter += 1
     while True:
         user = input("\nWho do you want to see entries from? ")
         for x in set(name_list):
@@ -145,37 +153,49 @@ def search_name_entries():
             continue
 
 def search_date_entries():
+    """Search for date entries"""
     print("Here are the dates of when users added an entry:\n ")
-    date_list = []
-    set_date_list = []
+
+    date_list = [date.timestamp for date in Entry.select()]
+
     counter = 1
-    for date in Entry.select():
-        date_list.append(date.timestamp)
+    #prints all the date entries so the user can pick a date
     for date in set(date_list):
-        set_date_list.append(date)
-        print(counter,":", date)
+        print(str(counter)+": "+date)
         counter += 1
+
     while True:
         try:
-            date_entered = int(input("\nWhich date do you want to see entries from? "))
-            if date_entered >= 1:
-                date_entered -= 1
-                view_entries('date', set_date_list[date_entered])
-                menu_loop()
-                return
-        except (IndexError, ValueError):
+            date_entered = input("\nWhich date do you want to see entries from? ")
+            datetime.datetime.strptime(date_entered, '%d/%m/%Y')
+            for x in set(date_list):
+                if date_entered in x:
+                    view_entries('date', date_entered)
+                    menu_loop()
+                    return
+            else:
+                clear()
+                print("Not a valid entry, try again!\n")
+                search_date_entries()
+
+        except ValueError:
             clear()
-            print("Not a valid entry, please enter an available number!\n")
+            print("Not a valid entry, try again!\n")
             search_date_entries()
             continue
 
 def search_minutes_entries():
+    """Search for minutes entries"""
     print("Here are the amount of minutes users worked on an entry: \n")
-    minutes_list = []
-    for time in Entry.select():
-        minutes_list.append(str(time.minutes_worked))
+
+    minutes_list = [str(time.minutes_worked) for time in Entry.select()]
+
+    counter = 1
+    #prints all the minutes entries so the user can pick a minute
     for time in set(minutes_list):
-        print(time)
+        print(str(counter)+": "+time)
+        counter += 1
+
     while True:
         minutes = (input("\nWhich amount do you want to see entries from? "))
         if minutes in set(minutes_list):
@@ -188,29 +208,25 @@ def search_minutes_entries():
             search_minutes_entries()
             continue
 
-def search_notes_entries():
-    notes_list = []
-    task_name_list = []
-    for task_name in Entry.select():
-        task_name_list.append(task_name.task_name)
-    for notes in Entry.select():
-        notes_list.append(notes.additional_notes)
+def search_note_and_task_name_entries():
+    """Search for notes and take name entries"""
+    notes_list = [notes.additional_notes for notes in Entry.select()]
+    task_name_list = [tasks.task_name for tasks in Entry.select()]
+
+    to = notes_list + task_name_list
+
     while True:
-        print (notes_list, "this is the notes")
-        print (task_name_list, "this is taskname")
         notes_search = input("Which search entry would you like to make? ")
-        print(notes_search, "this test")
-        for x in notes_list:
+        for x in to:
             if notes_search in x:
-                view_entries(' ', notes_search)
+                view_entries('darkchild', notes_search)
                 menu_loop()
                 return
-        # elif notes_search in task_name_list:
-        #     # view_entries('task_name', notes_search)
+
         else:
             clear()
-            print("Not a valid entry try again\n")
-            search_notes_entries()
+            print("Not a valid entryyyyyyyyy try again\n")
+            search_note_and_task_name_entries()
             continue
 
 def delete_entry(entry):
@@ -227,7 +243,3 @@ menu = OrderedDict([
 if __name__=='__main__':
     initialize()
     menu_loop()
-
-##afsluiten van menutjes
-##na het tonen van de resultaten
-##alles moet netjes worden afgesloten

@@ -1,8 +1,12 @@
 from unittest.mock import patch
 import unittest
+import io
+import sys
 
 import work_log
 from prompts import AddEntry
+from database import Entry
+
 
 class MyTestCase(unittest.TestCase):
 
@@ -22,12 +26,17 @@ class MyTestCase(unittest.TestCase):
 
     def test_name_input_is_string(self):
         with patch('builtins.input', side_effect=["string"]) as mock:
-            result = self.prompts.name()
+            result = self.prompts.employee()
             self.assertIsInstance(result, str)
 
     def test_task_name_input_is_string(self):
         with patch('builtins.input', side_effect=["string"]) as mock:
             result = self.prompts.task_name()
+            self.assertIsInstance(result, str)
+
+    def test_date_is_datetime(self):
+        with patch('builtins.input', side_effect=["12/05/2018"]) as mock:
+            result = self.prompts.task_date()
             self.assertIsInstance(result, str)
 
     def test_notes_input_is_string(self):
@@ -38,20 +47,71 @@ class MyTestCase(unittest.TestCase):
     def test_menu(self):
         self.assertIsInstance(work_log.menu, dict)
 
-    def test_if_notes_or_taskname_input_is_in_database(self):
-        with patch('builtins.input', side_effect=["python testing", 'q']) as mock:
-            result = work_log.search_notes_entries()
-            self.assertEqual(work_log.Entry.task_name, result)
+class BaseTestCase(unittest.TestCase):
 
-    def test_if_minutes_is_in_database(self):
-        with patch('builtins.input', side_effect=["40000", 'q']) as mock:
-            result = work_log.search_minutes_entries()
-            self.assertEqual(work_log.Entry.minutes_worked, result)
+    def setUp(self):
+        self.prompts = AddEntry()
+        self.entry = work_log
+        self.date = '11/07/2011'
+        self.employee = 'hoessein'
+        self.task_name = 'learning to write unittests'
+        self.minutes = '800'
+        self.notes = 'i really love liverpool'
+        self.cap = io.StringIO()
+        sys.stdout = self.cap
 
-    def test_if_date_entry_is_in_database(self):
-        with patch('builtins.input', side_effect=["hoessein", 'q']) as mock:
-            result = work_log.search_name_entries()
-            self.assertNotEqual(work_log.Entry.task_name, result)
+    def test_entries_created(self):
+        with patch('builtins.input', side_effect=[self.date, self.employee, self.task_name, self.minutes, self.notes]) as mock:
+            self.entry.add_entry()
+
+    def test_employee_created(self):
+        assert Entry.name == self.employee
+
+    def test_task_name_created(self):
+        assert Entry.task_name == self.task_name
+
+    def test_minutes_created(self):
+        assert Entry.minutes_worked == self.minutes
+
+    def test_notes_created(self):
+        assert Entry.additional_notes == self.notes
+
+    def test_dates_created(self):
+        assert Entry.timestamp == self.date
+
+    def test_if_search_methods_prints_are_made(self):
+        """tests if prints are made to the console"""
+        self.entry.search_prints()
+        print('Captured', self.cap.getvalue())
+
+    def test_if_entries_prints_are_made(self):
+        self.entry.printer("")
+        print('Captured', self.cap.getvalue())
+
+    def test_if_employee_can_be_search_and_program_is_exited(self):
+        with self.assertRaises(SystemExit):
+            with patch('builtins.input', side_effect=[self.employee, "e"]) as mock:
+                self.entry.search_name_entries()
+
+    def test_if_date_can_be_searched_and_program_is_exited(self):
+        with self.assertRaises(SystemExit):
+            with patch('builtins.input', side_effect=[self.date, "e"]) as mock:
+                self.entry.search_date_entries()
+
+    def test_if_minute_can_be_searched_and_program_is_exited(self):
+        with self.assertRaises(SystemExit):
+            with patch('builtins.input', side_effect=[self.minutes, "e"]) as mock:
+                self.entry.search_minutes_entries()
+
+    def test_if_task_name_can_be_searched_and_program_is_exited(self):
+        with self.assertRaises(SystemExit):
+            with patch('builtins.input', side_effect=[self.task_name, "e"]) as mock:
+                self.entry.search_note_and_task_name_entries()
+
+    def test_if_notes_can_be_searched_and_program_is_exited(self):
+        with self.assertRaises(SystemExit):
+            with patch('builtins.input', side_effect=[self.notes, "e"]) as mock:
+                self.entry.search_note_and_task_name_entries()
 
 if __name__ == '__main__':
     unittest.main()

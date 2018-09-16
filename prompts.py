@@ -10,10 +10,21 @@ class AddEntry:
         """This is a method that clears the console screen"""
         os.system('cls' if os.name == 'nt' else 'clear')
 
-    def name(self):
+    def task_date(self):
         """Takes an input from the user and makes sure its in the write format"""
-        task_date = input("Enter your name: ").lower()
-        return task_date
+        while True:
+            try:
+                task_date = input("What is the date of the task? Please use DD/MM/YYYY: ")
+                datetime.datetime.strptime(task_date, '%d/%m/%Y')
+                return task_date
+            except ValueError:
+                self.clear()
+                print("Enter the correct format.\n")
+
+    def employee(self):
+        """Takes an input from the user and makes sure its in the write format"""
+        employee_name = input("Enter your name: ").lower()
+        return employee_name
 
     def task_name(self):
         """Takes a task title from the user"""
@@ -35,14 +46,3 @@ class AddEntry:
         notes = input("Do you have any additional notes?: ").lower()
         return notes
 
-
-
-# new_name = []
-#
-# name = "what is the meh"
-#
-# if name == 'what is the mehh':
-#     new_name.append(name)
-#
-#
-# print(new_name)
