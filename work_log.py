@@ -175,12 +175,12 @@ def search_date_entries():
                     return
             else:
                 clear()
-                print("Not a valid entry, try again!\n")
+                print("Not a valid entry, please use DD/MM/YYYY!\n")
                 search_date_entries()
 
         except ValueError:
             clear()
-            print("Not a valid entry, try again!\n")
+            print("Not a valid entry, please use DD/MM/YYYY!\n")
             search_date_entries()
             continue
 
